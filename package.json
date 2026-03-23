@@ -1,0 +1,11 @@
+{
+  "name": "umich-canvas-server",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "boto3": "^0.0.1",
+    "cheerio": "^1.0.0",
+    "json": "^11.0.0"
+  }
+}

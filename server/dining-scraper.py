@@ -19,10 +19,14 @@ def scrape():
     prin = True
     for dining_hall in dining_halls:
         menu = get_menu(dining_hall)
-        print("GETTING BREAKFAST")
-        if(prin):
+        # print("GETTING BREAKFAST")
+        if(dining_hall == "bursley"):
+            # for item in menu['breakfast']:
+            #     print(item)
             print(menu['breakfast'])
-        prin = False
+            print(menu['lunch'])
+            print(menu['dinner'])
+        # prin = False
 
     return
 
@@ -50,14 +54,9 @@ def get_menu(hall):
 
     soup = BeautifulSoup(response.text, 'html.parser')
     
-    # menu = {
-    #     "breakfast": [],
-    #     "lunch": [],
-    #     "dinner": []
-    # }
-    menu = defaultdict(dict)
+    menu = defaultdict(list)
     menu_data = defaultdict(dict)
-    all_food_items = defaultdict(dict)
+    
     # stations = {
     #     "hot-cereal" : [],
     #     "toast" : [],
@@ -67,28 +66,42 @@ def get_menu(hall):
     #     "signature-blue" : [],
     #     "24-carrots" : [],
     # } 
+    meal_map = {
+        0 : 'breakfast',
+        1 : 'lunch',
+        2 : 'dinner'              
+    }
     
     
     food_items_container = soup.find('div', id='mdining-items')
-    meals_divided = food_items_container.find_all(['h3', 'div'], class_=['courses', ''])
-    for i in range (0,2):
-        
-        what_meal = meals_divided[2*i].get_text(strip=True)
-        courses_list = meals_divided[1+ 2*i].find('ul')
+    meals_divided = food_items_container.find_all(['div'], class_=['courses'])
+    for i in range (0,3):
+        station_data = defaultdict(list)
+        what_meal = meal_map[i]
+        courses_list = meals_divided[i].find('ul', class_='courses_wrapper')
         courses = courses_list.find_all('li', recursive=False)
         for course in courses:
             if not course.find('h4'):
+                print("Skipped")
                 continue
-            print(courses)
+            # print(courses)
             print(i)
             station = course.find('h4').get_text(strip =True)
-            meals_container = course.find('ul')
-            meals = meals_container.find_all('li', recursive=False)
+            meals_container = course.find('ul', class_= "items")
+            meals = [li for li in meals_container.find_all('li') if li.find('h5')]
+            meals = [
+                        li for li in meals_container.find_all('li', recursive=False) 
+                        if li.find('h5')
+                    ]
+
+            # meals = meals_container.find_all('li', recursive=False)
+            # meals = [tag for tag in meals_container.children 
+            #  if tag.name == 'li'] 
             for meal in meals:
                 name = meal.find('h5').find('span').get_text(strip = True)
-                all_food_items[station] = (MenuItem(what_meal, name, station))
-        menu[what_meal] = (all_food_items)
-#.
+                new_item = MenuItem(what_meal, name, station)
+                station_data[station].append(new_item)
+        menu[what_meal] = (station_data)
     
 
         # for item in items:
